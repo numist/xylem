@@ -311,7 +311,7 @@ internal struct SAXParserTests {
   internal func characterReferenceBoundaryAcceptance() throws {
     let events = try parseEvents("<r>&#x9;&#xA;&#xD;&#x20;&#xD7FF;&#xE000;&#xFFFD;&#x10000;&#x10FFFF;</r>")
     let text = try rootText(in: events)
-    let scalars = [0x9, 0xa, 0xd, 0x20, 0xd7ff, 0xe000, 0xfffd, 0x10000, 0x10ffff]
+    let scalars = [0x09, 0x0a, 0x0d, 0x20, 0xd7ff, 0xe000, 0xfffd, 0x0001_0000, 0x0010_ffff]
     let expected = String(String.UnicodeScalarView(scalars.compactMap(Unicode.Scalar.init)))
     #expect(text == expected)
   }

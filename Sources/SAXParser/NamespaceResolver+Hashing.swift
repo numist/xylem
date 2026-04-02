@@ -15,9 +15,9 @@ private func span(of reference: XML.ResolvedAttributes.Reference,
 }
 
 internal struct FNVHasher {
-  private static let prime: UInt64 = 0x00000100000001b3
+  private static let prime: UInt64 = 0x0000_0100_0000_01b3
 
-  private var value: UInt64 = 0xcbf29ce484222325
+  private var value: UInt64 = 0xcbf2_9ce4_8422_2325
 
   @inline(__always)
   private mutating func mix(_ bytes: borrowing Span<XML.Byte>) {

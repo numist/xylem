@@ -321,7 +321,7 @@ internal struct DOMParserTests {
     ) { document in
       let root = try topLevelElement(in: document)
       let text = try firstChildText(of: root, in: document)
-      let scalars = [0x9, 0xa, 0xd, 0x20, 0xd7ff, 0xe000, 0xfffd, 0x10000, 0x10ffff]
+      let scalars = [0x09, 0x0a, 0x0d, 0x20, 0xd7ff, 0xe000, 0xfffd, 0x0001_0000, 0x0010_ffff]
       let expected = String(String.UnicodeScalarView(scalars.compactMap(Unicode.Scalar.init)))
       #expect(text == expected)
     }

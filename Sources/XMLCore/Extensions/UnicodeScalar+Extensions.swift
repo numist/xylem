@@ -7,18 +7,18 @@ extension Unicode.Scalar {
   // [2]: Char — any legal XML 1.0 character.
   internal var isXMLChar: Bool {
     return switch value {
-    case 0x0009, 0x000a, 0x000d: true
-    case 0x0020 ... 0x0d7ff:     true
-    case 0x0e000 ... 0x0fffd:    true
-    case 0x10000 ... 0x10ffff:   true
-    default:                     false
+    case 0x0000_0009, 0x0000_000a, 0x0000_000d: true
+    case 0x0000_0020 ... 0x0000_d7ff:           true
+    case 0x0000_e000 ... 0x0000_fffd:           true
+    case 0x0001_0000 ... 0x0010_ffff:           true
+    default: false
     }
   }
 
   // [3]: S — XML whitespace.
   package var isXMLSpace: Bool {
     switch value {
-    case 0x0009, 0x000a, 0x000d, 0x0020:
+    case 0x0000_0009, 0x0000_000a, 0x0000_000d, 0x0000_0020:
       true
     default:
       false
@@ -28,22 +28,22 @@ extension Unicode.Scalar {
   // [4]: NameStartChar — valid first character of an XML Name.
   internal var isXMLNameStartChar: Bool {
     return switch value {
-    case 0x0003a:             true  // :
-    case 0x00041 ... 0x0005a: true  // A-Z
-    case 0x0005f:             true  // _
-    case 0x00061 ... 0x0007a: true  // a-z
-    case 0x000c0 ... 0x000d6: true
-    case 0x000d8 ... 0x000f6: true
-    case 0x000f8 ... 0x002ff: true
-    case 0x00370 ... 0x0037d: true
-    case 0x0037f ... 0x01fff: true
-    case 0x0200c ... 0x0200d: true
-    case 0x02070 ... 0x0218f: true
-    case 0x02c00 ... 0x02fef: true
-    case 0x03001 ... 0x0d7ff: true
-    case 0x0f900 ... 0x0fdcf: true
-    case 0x0fdf0 ... 0x0fffd: true
-    case 0x10000 ... 0xeffff: true
+    case 0x0000_003a:                   true  // :
+    case 0x0000_0041 ... 0x0000_005a:   true  // A-Z
+    case 0x0000_005f:                   true  // _
+    case 0x0000_0061 ... 0x0000_007a:   true  // a-z
+    case 0x0000_00c0 ... 0x0000_00d6:   true
+    case 0x0000_00d8 ... 0x0000_00f6:   true
+    case 0x0000_00f8 ... 0x0000_02ff:   true
+    case 0x0000_0370 ... 0x0000_037d:   true
+    case 0x0000_037f ... 0x0000_1fff:   true
+    case 0x0000_200c ... 0x0000_200d:   true
+    case 0x0000_2070 ... 0x0000_218f:   true
+    case 0x0000_2c00 ... 0x0000_2fef:   true
+    case 0x0000_3001 ... 0x0000_d7ff:   true
+    case 0x0000_f900 ... 0x0000_fdcf:   true
+    case 0x0000_fdf0 ... 0x0000_fffd:   true
+    case 0x0001_0000 ... 0x000e_ffff:   true
     default: false
     }
   }
@@ -51,11 +51,11 @@ extension Unicode.Scalar {
   // [4a]: NameChar — valid subsequent character of an XML Name.
   internal var isXMLNameChar: Bool {
     return switch value {
-    case 0x002d, 0x002e:    true    // -, .
-    case 0x0030 ... 0x0039: true    // 0-9
-    case 0x00b7:            true
-    case 0x0300 ... 0x036f: true
-    case 0x203f ... 0x2040: true
+    case 0x0000_002d, 0x0000_002e:    true    // -, .
+    case 0x0000_0030 ... 0x0000_0039: true    // 0-9
+    case 0x0000_00b7:                 true
+    case 0x0000_0300 ... 0x0000_036f: true
+    case 0x0000_203f ... 0x0000_2040: true
     default: self.isXMLNameStartChar
     }
   }
