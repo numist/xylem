@@ -155,49 +155,45 @@ extension XML.Lexer {
   //   the scalar tail corrects them.  False negatives would be bugs.
   @_lifetime(self: copy self)
   private mutating func run() {
-    let start  = cursor
+    let start = cursor
+
+    let ones:  UInt64 = 0x0101_0101_0101_0101  // unit in each byte lane
+    let highs: UInt64 = 0x8080_8080_8080_8080  // MSB in each byte lane
+
     let vStop  = SIMD16<UInt8>(repeating: UInt8(ascii: "]"))  // 0x5d
     let vLT    = SIMD16<UInt8>(repeating: UInt8(ascii: "<"))  // 0x3c
     let vAmp   = SIMD16<UInt8>(repeating: UInt8(ascii: "&"))  // 0x26
     let vShift = SIMD16<UInt8>(repeating: 0x20)
     let vLimit = SIMD16<UInt8>(repeating: 0x5f)
+
     var offset = cursor
     bytes.withUnsafeBufferPointer { buffer in
       guard let base = UnsafeRawPointer(buffer.baseAddress) else { return }
-      while offset + 16 <= buffer.count {
+
+      // SIMD: 16 bytes per iteration using unaligned loads.
+      while buffer.count - offset >= 16 {
         let chunk = base.loadUnaligned(fromByteOffset: offset, as: SIMD16<UInt8>.self)
         let sentinels = (chunk .== vStop) .| (chunk .== vLT) .| (chunk .== vAmp)
         let controls  = (chunk &- vShift) .> vLimit
         if any(sentinels .| controls) { break }
         offset += 16
       }
+
+      // SWAR: 8 bytes per iteration using a single unaligned load.
+      while buffer.count - offset >= 8 {
+        let word = base.loadUnaligned(fromByteOffset: offset, as: UInt64.self)
+        let xStop: UInt64 = word ^ 0x5d5d_5d5d_5d5d_5d5d  // ']' = 0x5d
+        let xLT:   UInt64 = word ^ 0x3c3c_3c3c_3c3c_3c3c  // '<' = 0x3c
+        let xAmp:  UInt64 = word ^ 0x2626_2626_2626_2626  // '&' = 0x26
+        let sentinels: UInt64 = ((xStop &- ones) & ~xStop)
+                              | ((xLT   &- ones) & ~xLT  )
+                              | ((xAmp  &- ones) & ~xAmp )
+        let controls: UInt64 = word | ((word &- 0x2020_2020_2020_2020) & ~word)
+        guard (sentinels | controls) & highs == 0 else { break }
+        offset += 8
+      }
     }
     cursor = offset
-    let ones:  UInt64 = 0x0101010101010101  // unit in each byte lane
-    let highs: UInt64 = 0x8080808080808080  // MSB  in each byte lane
-    while cursor + 8 <= bytes.count {
-      let lo: UInt64 = UInt64(bytes[cursor    ])
-                     | UInt64(bytes[cursor + 1]) <<  8
-                     | UInt64(bytes[cursor + 2]) << 16
-                     | UInt64(bytes[cursor + 3]) << 24
-      let hi: UInt64 = UInt64(bytes[cursor + 4])
-                     | UInt64(bytes[cursor + 5]) <<  8
-                     | UInt64(bytes[cursor + 6]) << 16
-                     | UInt64(bytes[cursor + 7]) << 24
-      let word: UInt64 = lo | hi << 32
-      let xStop: UInt64 = word ^ 0x5d5d5d5d5d5d5d5d  // ']' = 0x5d
-      let xLT:   UInt64 = word ^ 0x3c3c3c3c3c3c3c3c  // '<' = 0x3c
-      let xAmp:  UInt64 = word ^ 0x2626262626262626   // '&' = 0x26
-      let sentinels: UInt64 = ((xStop &- ones) & ~xStop)
-                             | ((xLT   &- ones) & ~xLT  )
-                             | ((xAmp  &- ones) & ~xAmp )
-      // Detect bytes outside printable ASCII:
-      //   word                        → any byte ≥ 0x80 (high bit already set)
-      //   (word &- 0x2020...) & ~word → any byte < 0x20 (subtraction wraps, sets high bit)
-      let controls: UInt64 = word | ((word &- 0x2020202020202020) & ~word)
-      if (sentinels | controls) & highs != 0 { break }
-      cursor += 8
-    }
     // Scalar tail.
     while cursor < bytes.count {
       let byte = bytes[cursor]
