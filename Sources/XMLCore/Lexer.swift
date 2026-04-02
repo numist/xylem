@@ -525,6 +525,23 @@ extension XML.Lexer {
     let name = SourceRange(try name())
     spaces()
     let attributes = cursor
+
+    // Fast path for unattributed tags: avoid buffer swap entirely.
+    guard cursor < bytes.count else { throw .unexpectedEOF }
+    if bytes[cursor] == UInt8(ascii: ">") || bytes[cursor] == UInt8(ascii: "/") {
+      let closed = bytes[cursor] == UInt8(ascii: "/")
+      let range = SourceRange(attributes ..< cursor)
+      step()  // consume '>' or '/'
+      if closed { try consume(UInt8(ascii: ">")) }
+      return Located(value: .start(name: bytes.extracting(name),
+                                   attributes: XML.UnresolvedAttributes(source: bytes,
+                                                                        range: range,
+                                                                        records: [],
+                                                                        namespaced: false),
+                                   closed: closed),
+                     source: source(from: start))
+    }
+
     // Alternate between two buffers. When we clear `self.attributes` it holds
     // the buffer from two elements ago — by then that token has been processed
     // and dropped, so the buffer is uniquely owned and removeAll is CoW-free.
