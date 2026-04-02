@@ -187,8 +187,5 @@ extension XML {
       self.init(materializing: try QualifiedNameView(validating: bytes, colon: colon))
     }
 
-    package init(unvalidated bytes: borrowing Span<Byte>, colon: Span<Byte>.Index? = nil) {
-      self.init(materializing: QualifiedNameView(unvalidated: bytes, colon: colon))
-    }
   }
 }
