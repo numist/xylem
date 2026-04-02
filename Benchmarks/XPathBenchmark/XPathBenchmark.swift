@@ -34,7 +34,6 @@ private func document(body: String, note: String? = nil, interval: Int = 1, size
 // MARK: - XPath parse + evaluate
 
 @inline(never)
-@_lifetime(borrow bytes)
 private func evaluate(_ bytes: Span<XML.Byte>,
                        expression: XPath.Expression) throws -> Int {
   let document = try DOMParser.parse(bytes: bytes)

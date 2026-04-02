@@ -20,7 +20,6 @@ extension XML {
 
     @inline(__always)
     @_lifetime(self: copy self)
-    @_lifetime(&self)
     private mutating func spaces() -> Bool {
       let start = cursor
       while cursor < bytes.count, bytes[cursor].isXMLASCIIWhitespace {
@@ -34,7 +33,6 @@ extension XML {
     // AttValue   ::= '"' ([^<&"] | Reference)* '"'
     //              | "'" ([^<&'] | Reference)* "'"
     @_lifetime(self: copy self)
-    @_lifetime(&self)
     package mutating func next() throws(XML.Error) -> (name: Range<Span<Byte>.Index>, value: Range<Span<Byte>.Index>, processed: Bool)? {
       guard cursor < bytes.count else { return nil }
 

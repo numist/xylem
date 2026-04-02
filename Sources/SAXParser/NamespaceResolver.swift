@@ -167,7 +167,6 @@ extension NamespaceResolver {
   }
 
   @_lifetime(self: copy self)
-  @_lifetime(&self)
   internal mutating func remove(bindings range: Range<Int>) {
     guard !range.isEmpty else { return }
     if let defaultNamespace, range.contains(defaultNamespace) {
@@ -211,7 +210,6 @@ extension NamespaceResolver {
 
   @inline(__always)
   @_lifetime(self: copy self)
-  @_lifetime(&self)
   private mutating func intern(binding record: XML.UnresolvedAttributes.Record,
                                bytes: borrowing Span<XML.Byte>,
                                source: SourceRange) throws(XML.Error) -> XML.ResolvedAttributes.Reference {
@@ -229,7 +227,6 @@ extension NamespaceResolver {
 
   @inline(__always)
   @_lifetime(self: copy self)
-  @_lifetime(&self)
   private mutating func advance() {
     if generation == .max {
       generation = 1
@@ -244,7 +241,6 @@ extension NamespaceResolver {
 
   @inline(__always)
   @_lifetime(self: copy self)
-  @_lifetime(&self)
   private mutating func reference(for binding: Int, sourceCount: Int) -> XML.ResolvedAttributes.Reference {
     if bindings[binding].generation == generation,
        let cached = bindings[binding].reference {
@@ -268,7 +264,6 @@ extension NamespaceResolver {
   }
 
   @_lifetime(self: copy self)
-  @_lifetime(&self)
   private mutating func declare(prefix: SourceRange?,
                                 uri: XML.ResolvedAttributes.Reference) throws(XML.Error) {
     let prefix: XML.ResolvedAttributes.Reference? = prefix.map { .input($0) }
@@ -277,7 +272,6 @@ extension NamespaceResolver {
   }
 
   @_lifetime(self: copy self)
-  @_lifetime(&self)
   private mutating func append(_ attribute: XML.UnresolvedAttributes.Record,
                                from bytes: borrowing Span<XML.Byte>,
                                namespace: Reference? = nil) throws(XML.Error) {
@@ -288,7 +282,6 @@ extension NamespaceResolver {
                                                 namespace: namespace))
   }
 
-  @_lifetime(borrow prefix)
   private func binding(prefix: borrowing Span<XML.Byte>) -> Int? {
     let hash = FNVHasher.hash(prefix)
     for index in bindings.indices.reversed() {
@@ -315,7 +308,6 @@ extension NamespaceResolver {
   }
 
   @_lifetime(self: copy self)
-  @_lifetime(&self)
   private mutating func unique(record: XML.ResolvedAttributes.Record,
                                for bytes: borrowing Span<XML.Byte>,
                                at index: Int,
@@ -341,7 +333,6 @@ extension NamespaceResolver {
   }
 
   @_lifetime(self: copy self)
-  @_lifetime(&self)
   private mutating func insert(_ name: borrowing Span<XML.Byte>,
                                at index: Int,
                                in records: borrowing [XML.UnresolvedAttributes.Record],
@@ -383,7 +374,6 @@ extension NamespaceResolver {
 
   @inline(__always)
   @_lifetime(self: copy self)
-  @_lifetime(&self)
   private mutating func install(_ binding: consuming Binding) {
     let binding = consume binding
     if binding.prefix == nil { defaultNamespace = bindings.count }
@@ -392,7 +382,6 @@ extension NamespaceResolver {
 
   @inline(__always)
   @_lifetime(self: copy self)
-  @_lifetime(&self)
   private mutating func uninstall(defaultBinding index: Int) {
     assert(bindings[index].prefix == nil)
     assert(defaultNamespace == index)
