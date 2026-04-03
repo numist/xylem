@@ -152,6 +152,13 @@ extension NamespaceResolver {
   internal func resolve(_ name: borrowing Span<XML.Byte>) throws(XML.Error) -> Element {
     let colon = name.first(UInt8(ascii: ":"))
     if let colon { try XML.QualifiedName.validate(name, colon: colon) }
+
+    // Fast path: an unprefixed name with no default namespace cannot resolve to
+    // a namespace, so skip the binding lookup and namespace resolution.
+    if colon == nil, defaultNamespace == nil {
+      return Element(name: name, colon: colon, namespace: nil)
+    }
+
     let namespace = if let binding = try binding(of: name, colon: colon, attribute: false) {
         bindings[binding].uri
       } else {
