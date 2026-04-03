@@ -10,7 +10,7 @@ extension XML {
   /// the source; callers receive the same `Span<XML.Byte>` API regardless.
   ///
   /// This is a borrowing view - it does not own the underlying storage.
-  public struct ResolvedAttributesView: ~Escapable {
+  public struct ResolvedAttributes: ~Escapable {
     package enum Reference {
       case input(SourceRange)
       case buffer(Range<Int>)

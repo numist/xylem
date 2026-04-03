@@ -75,7 +75,7 @@ private struct Builder: Handler {
 
   fileprivate mutating func start(element name: XML.QualifiedNameView,
                                   namespace uri: Span<XML.Byte>?,
-                                  attributes: XML.ResolvedAttributesView) {
+                                  attributes: XML.ResolvedAttributes) {
     let index = append(element: name, namespace: uri, attributes: attributes)
     push(index)
   }
@@ -137,7 +137,7 @@ private struct Builder: Handler {
 
   private mutating func append(element name: borrowing XML.QualifiedNameView,
                                namespace uri: Span<XML.Byte>?,
-                               attributes: borrowing XML.ResolvedAttributesView) -> Int32 {
+                               attributes: borrowing XML.ResolvedAttributes) -> Int32 {
     var node = Document.Node(kind: .element)
     node.name = (store(name.bytes), name.local.fnv1a32())
     node.colon = name.colon.map(Int32.init) ?? -1
@@ -157,7 +157,7 @@ private struct Builder: Handler {
     return id
   }
 
-  private mutating func intern(_ attributes: borrowing XML.ResolvedAttributesView) {
+  private mutating func intern(_ attributes: borrowing XML.ResolvedAttributes) {
     for index in attributes.indices {
       self.attributes.append(attribute(named: attributes.name(at: index),
                                        namespace: attributes.namespace(at: index),

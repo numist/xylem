@@ -88,7 +88,7 @@ public protocol Handler {
   ///   - attributes: The resolved attribute list.
   mutating func start(element name: XML.QualifiedNameView,
                       namespace uri: Span<XML.Byte>?,
-                      attributes: XML.ResolvedAttributesView) throws(Failure)
+                      attributes: XML.ResolvedAttributes) throws(Failure)
 
   /// Called when an element end tag is encountered, including the implicit end
   /// tag of an empty-element tag.

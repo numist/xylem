@@ -98,7 +98,7 @@ private struct RecordingHandler: Handler {
 
   fileprivate mutating func start(element name: XML.QualifiedNameView,
                                   namespace uri: Span<XML.Byte>?,
-                                  attributes: XML.ResolvedAttributesView) {
+                                  attributes: XML.ResolvedAttributes) {
     var resolved: [SAXAttribute] = []
     resolved.reserveCapacity(attributes.count)
     for index in attributes.indices {
@@ -135,7 +135,7 @@ private struct LocationHandler: Handler {
 
   fileprivate mutating func start(element name: XML.QualifiedNameView,
                                   namespace _: Span<XML.Byte>?,
-                                  attributes _: XML.ResolvedAttributesView) {
+                                  attributes _: XML.ResolvedAttributes) {
     if let location {
       elements.append(ElementLocation(phase: "start", name: name.bytes.string, location: location))
     }
@@ -158,7 +158,7 @@ private struct FailingHandler: Handler {
 
   fileprivate mutating func start(element _: XML.QualifiedNameView,
                                   namespace _: Span<XML.Byte>?,
-                                  attributes _: XML.ResolvedAttributesView) throws(HandlerFailure) {
+                                  attributes _: XML.ResolvedAttributes) throws(HandlerFailure) {
     throw .injected
   }
 }

@@ -6,8 +6,8 @@ internal import XMLCore
 internal struct NamespaceResolver: ~Copyable, ~Escapable {
   // MARK: - Types
 
-  internal typealias Reference = XML.ResolvedAttributesView.Reference
-  private typealias Record = XML.ResolvedAttributesView.Record
+  internal typealias Reference = XML.ResolvedAttributes.Reference
+  private typealias Record = XML.ResolvedAttributes.Record
 
   internal struct Element: ~Escapable {
     internal let namespace: Reference?
@@ -130,10 +130,10 @@ extension NamespaceResolver {
              let binding = try binding(of: bytes.extracting(record.name), colon: colon, attribute: true) {
           reference(for: binding, sourceCount: bytes.count)
         } else {
-          nil as XML.ResolvedAttributesView.Reference?
+          nil as XML.ResolvedAttributes.Reference?
         }
       try unique(record: record, for: bytes, at: index, namespace: namespace)
-      let updated = XML.ResolvedAttributesView.Record(name: record.name, colon: record.colon,
+      let updated = XML.ResolvedAttributes.Record(name: record.name, colon: record.colon,
                                                   value: record.value, namespace: namespace)
       self.attributes.records.front[index] = updated
     }
@@ -157,7 +157,7 @@ extension NamespaceResolver {
     let namespace = if let binding = try binding(of: name, colon: colon, attribute: false) {
         bindings[binding].uri
       } else {
-        nil as XML.ResolvedAttributesView.Reference?
+        nil as XML.ResolvedAttributes.Reference?
       }
     return Element(name: name, colon: colon, namespace: namespace)
   }
@@ -203,7 +203,7 @@ extension NamespaceResolver {
 extension NamespaceResolver {
   @inline(__always)
   @_lifetime(borrow self)
-  private func span(for reference: XML.ResolvedAttributesView.Reference) -> Span<XML.Byte> {
+  private func span(for reference: XML.ResolvedAttributes.Reference) -> Span<XML.Byte> {
     switch reference {
     case let .input(range): source.extracting(range)
     case let .buffer(range): arena.span(for: range)
@@ -214,14 +214,14 @@ extension NamespaceResolver {
   @_lifetime(self: copy self)
   private mutating func intern(binding record: XML.UnresolvedAttributes.Record,
                                bytes: borrowing Span<XML.Byte>,
-                               source: SourceRange) throws(XML.Error) -> XML.ResolvedAttributesView.Reference {
+                               source: SourceRange) throws(XML.Error) -> XML.ResolvedAttributes.Reference {
     try record.normalize(in: bytes, source: source, into: &arena)
   }
 
   @inline(__always)
   @_lifetime(borrow self, borrow attributes)
-  internal func resolve(_ attributes: borrowing XML.UnresolvedAttributes) -> XML.ResolvedAttributesView {
-    XML.ResolvedAttributesView(source: attributes.source,
+  internal func resolve(_ attributes: borrowing XML.UnresolvedAttributes) -> XML.ResolvedAttributes {
+    XML.ResolvedAttributes(source: attributes.source,
                                range: attributes.range,
                                buffer: self.attributes.records.store.bytes,
                                records: self.attributes.records.front)
@@ -243,7 +243,7 @@ extension NamespaceResolver {
 
   @inline(__always)
   @_lifetime(self: copy self)
-  private mutating func reference(for binding: Int, sourceCount: Int) -> XML.ResolvedAttributesView.Reference {
+  private mutating func reference(for binding: Int, sourceCount: Int) -> XML.ResolvedAttributes.Reference {
     if bindings[binding].generation == generation,
        let cached = bindings[binding].reference {
       return cached
@@ -252,7 +252,7 @@ extension NamespaceResolver {
     self.attributes.records.store.reserve(capacity: sourceCount)
     let source = self.source
     let uri = bindings[binding].uri
-    let reference: XML.ResolvedAttributesView.Reference
+    let reference: XML.ResolvedAttributes.Reference
     switch uri {
     case let .input(range):
       reference = self.attributes.records.store.intern(source.extracting(range))
@@ -267,8 +267,8 @@ extension NamespaceResolver {
 
   @_lifetime(self: copy self)
   private mutating func declare(prefix: SourceRange?,
-                                uri: XML.ResolvedAttributesView.Reference) throws(XML.Error) {
-    let prefix: XML.ResolvedAttributesView.Reference? = prefix.map { .input($0) }
+                                uri: XML.ResolvedAttributes.Reference) throws(XML.Error) {
+    let prefix: XML.ResolvedAttributes.Reference? = prefix.map { .input($0) }
     let hash = try validate(prefix: prefix, uri: uri)
     install(Binding(prefix: prefix, hash: hash, uri: uri))
   }
@@ -310,10 +310,10 @@ extension NamespaceResolver {
   }
 
   @_lifetime(self: copy self)
-  private mutating func unique(record: XML.ResolvedAttributesView.Record,
+  private mutating func unique(record: XML.ResolvedAttributes.Record,
                                for bytes: borrowing Span<XML.Byte>,
                                at index: Int,
-                               namespace: XML.ResolvedAttributesView.Reference?) throws(XML.Error) {
+                               namespace: XML.ResolvedAttributes.Reference?) throws(XML.Error) {
     let part = local(name: record.name, colon: record.colon, in: bytes)
     // Capture records and storage as local lets so the closure retains each
     // array once (vs calling the computed-property getter on every invocation).
@@ -346,8 +346,8 @@ extension NamespaceResolver {
     }
   }
 
-  private func validate(prefix: XML.ResolvedAttributesView.Reference?,
-                        uri reference: XML.ResolvedAttributesView.Reference) throws(XML.Error) -> UInt64 {
+  private func validate(prefix: XML.ResolvedAttributes.Reference?,
+                        uri reference: XML.ResolvedAttributes.Reference) throws(XML.Error) -> UInt64 {
     let uri = span(for: reference)
     if uri == StaticString("http://www.w3.org/2000/xmlns/") { throw .invalidAttribute }
 
