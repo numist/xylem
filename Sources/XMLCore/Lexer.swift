@@ -8,8 +8,7 @@ extension XML {
     package let bytes: Span<Byte>
     package private(set) var location: XML.Location = XML.Location()
     private var cursor: Span<Byte>.Index
-    private var attributes: (back: [XML.UnresolvedAttributes.Record],
-                             front: [XML.UnresolvedAttributes.Record]) = ([], [])
+    private var attributes: [XML.UnresolvedAttributes.Record] = []
 
     @_lifetime(borrow input)
     package init(bytes input: Span<Byte>, cursor: Span<Byte>.Index = 0) {
@@ -525,6 +524,10 @@ extension XML.Lexer {
     spaces()
     let attributes = cursor
 
+    if !self.attributes.isEmpty {
+      self.attributes.removeAll(keepingCapacity: true)
+    }
+
     // Fast path for unattributed tags: avoid buffer swap entirely.
     guard cursor < bytes.count else { throw .unexpectedEOF }
     if bytes[cursor] == UInt8(ascii: ">") || bytes[cursor] == UInt8(ascii: "/") {
@@ -535,17 +538,12 @@ extension XML.Lexer {
       return Located(value: .start(name: bytes.extracting(name),
                                    attributes: XML.UnresolvedAttributes(source: bytes,
                                                                         range: range,
-                                                                        records: [],
+                                                                        records: self.attributes,
                                                                         namespaced: false),
                                    closed: closed),
                      source: source(from: start))
     }
 
-    // Alternate between two buffers. When we clear `self.attributes` it holds
-    // the buffer from two elements ago — by then that token has been processed
-    // and dropped, so the buffer is uniquely owned and removeAll is CoW-free.
-    swap(&self.attributes.front, &self.attributes.back)
-    self.attributes.front.removeAll(keepingCapacity: true)
     var namespaced = false
     var requiresSpace = false
 
@@ -561,14 +559,14 @@ extension XML.Lexer {
         return Located(value: .start(name: bytes.extracting(name),
                                      attributes: XML.UnresolvedAttributes(source: bytes,
                                                                           range: range,
-                                                                          records: self.attributes.front,
+                                                                          records: self.attributes,
                                                                           namespaced: namespaced),
                                      closed: closed),
                        source: source(from: start))
       default:
         if requiresSpace, !spaced { throw .invalidCharacter }
         let record = try attribute(at: attributes, namespaced: &namespaced)
-        self.attributes.front.append(record)
+        self.attributes.append(record)
         requiresSpace = true
       }
     }

@@ -30,13 +30,21 @@ extension XML {
     package let source: Span<Byte>
     package let range: SourceRange
     package let namespaced: Bool
-    package let records: [Record]
+    package let records: Span<Record>
 
-    @_lifetime(borrow source)
-    package init(source: borrowing Span<Byte>, range: SourceRange, records: [Record], namespaced: Bool) {
+    @_lifetime(borrow source, borrow records)
+    package init(source: borrowing Span<Byte>, range: SourceRange, records: borrowing Span<Record>, namespaced: Bool) {
       self.source = copy source
       self.range = range
-      self.records = records
+      self.records = copy records
+      self.namespaced = namespaced
+    }
+
+    @_lifetime(borrow source, borrow records)
+    package init(source: borrowing Span<Byte>, range: SourceRange, records: borrowing [Record], namespaced: Bool) {
+      self.source = copy source
+      self.range = range
+      self.records = records.span
       self.namespaced = namespaced
     }
 

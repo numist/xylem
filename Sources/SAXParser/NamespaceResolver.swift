@@ -337,7 +337,7 @@ extension NamespaceResolver {
   @_lifetime(self: copy self)
   private mutating func insert(_ name: borrowing Span<XML.Byte>,
                                at index: Int,
-                               in records: borrowing [XML.UnresolvedAttributes.Record],
+                               in records: borrowing Span<XML.UnresolvedAttributes.Record>,
                                bytes: borrowing Span<XML.Byte>) throws(XML.Error) {
     guard self.attributes.visited.insert(index,
                                          hash: FNVHasher.hash(name),
