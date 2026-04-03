@@ -69,14 +69,14 @@ public struct SAXParser<Processor: Handler> {
         try dtd(name: name, id: (public: `public`, system: system), at: location)
 
       case let .start(name, attributes, closed):
-        let resolved = try namespace.resolve(attributes: attributes)
+        let mappings = try namespace.mappings(for: attributes)
         let element = try namespace.resolve(name)
-        try start(mappings: resolved.mappings, in: namespace, at: location)
+        try start(mappings: mappings, in: namespace, at: location)
 
         handler.location = location
         try handler.start(element: element.name,
                           namespace: namespace.namespace(of: element),
-                          attributes: resolved.attributes)
+                          attributes: namespace.resolve(attributes))
 
         if closed {
           handler.location = location
@@ -332,14 +332,14 @@ extension SAXParser where Processor.Failure == Never {
         dtd(name: name, id: (public: `public`, system: system), at: location)
 
       case let .start(name, attributes, closed):
-        let resolved = try namespace.resolve(attributes: attributes)
+        let mappings = try namespace.mappings(for: attributes)
         let element = try namespace.resolve(name)
-        start(mappings: resolved.mappings, in: namespace, at: location)
+        start(mappings: mappings, in: namespace, at: location)
 
         handler.location = location
         handler.start(element: element.name,
                       namespace: namespace.namespace(of: element),
-                      attributes: resolved.attributes)
+                      attributes: namespace.resolve(attributes))
 
         if closed {
           handler.location = location

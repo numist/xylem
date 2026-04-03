@@ -18,7 +18,7 @@ internal struct Arena {
   }
 
   @inline(__always)
-  internal mutating func intern(_ literal: StaticString) -> XML.ResolvedAttributes.Reference {
+  internal mutating func intern(_ literal: StaticString) -> XML.ResolvedAttributesView.Reference {
     precondition(literal.hasPointerRepresentation)
 
     let start = bytes.count
@@ -27,7 +27,7 @@ internal struct Arena {
   }
 
   @inline(__always)
-  internal mutating func intern(_ bytes: borrowing Span<XML.Byte>) -> XML.ResolvedAttributes.Reference {
+  internal mutating func intern(_ bytes: borrowing Span<XML.Byte>) -> XML.ResolvedAttributesView.Reference {
     let start = self.bytes.count
     bytes.withUnsafeBufferPointer { self.bytes.append(contentsOf: $0) }
     return .buffer(start ..< self.bytes.count)
@@ -41,7 +41,7 @@ internal struct Arena {
 
   @inline(__always)
   internal mutating func append(expanding value: borrowing Span<XML.Byte>, mode: Expansion = .attribute)
-      throws(XML.Error) -> XML.ResolvedAttributes.Reference? {
+      throws(XML.Error) -> XML.ResolvedAttributesView.Reference? {
     guard let range = try bytes.append(expanding: value, mode: mode) else { return nil }
     return .buffer(range)
   }
@@ -128,7 +128,7 @@ internal struct ProbeSet {
 extension XML.UnresolvedAttributes.Record {
   @inline(__always)
   internal func normalize(in bytes: borrowing Span<XML.Byte>, source: SourceRange? = nil,
-                          into store: inout Arena) throws(XML.Error) -> XML.ResolvedAttributes.Reference {
+                          into store: inout Arena) throws(XML.Error) -> XML.ResolvedAttributesView.Reference {
     let range = source.map { value.absolute(in: $0) } ?? value
     guard !processed else { return .input(range) }
     store.reserve(capacity: bytes.count)

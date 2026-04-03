@@ -54,7 +54,7 @@ private struct CountingHandler: Handler {
 
   mutating func start(element name: XML.QualifiedNameView,
                       namespace uri: Span<XML.Byte>?,
-                      attributes: XML.ResolvedAttributes) throws(Never) {
+                      attributes: XML.ResolvedAttributesView) throws(Never) {
     total &+= name.bytes.count
     for index in attributes.indices {
       total &+= attributes.name(at: index).bytes.count

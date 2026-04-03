@@ -5,7 +5,7 @@ internal import XMLCore
 
 @inline(__always)
 @_lifetime(borrow source, borrow storage)
-private func span(of reference: XML.ResolvedAttributes.Reference,
+private func span(of reference: XML.ResolvedAttributesView.Reference,
                   in source: borrowing Span<XML.Byte>,
                   storage: Span<XML.Byte>) -> Span<XML.Byte> {
   switch reference {
@@ -47,7 +47,7 @@ internal struct FNVHasher {
   }
 
   @inline(__always)
-  private mutating func mix(_ reference: XML.ResolvedAttributes.Reference,
+  private mutating func mix(_ reference: XML.ResolvedAttributesView.Reference,
                             in source: borrowing Span<XML.Byte>,
                             storage: Span<XML.Byte>) {
     mix(span(of: reference, in: source, storage: storage))
@@ -68,7 +68,7 @@ internal struct FNVHasher {
   }
 
   @inline(__always)
-  internal static func hash(_ reference: XML.ResolvedAttributes.Reference,
+  internal static func hash(_ reference: XML.ResolvedAttributesView.Reference,
                             in source: borrowing Span<XML.Byte>,
                             storage: Span<XML.Byte>) -> UInt64 {
     var hash = FNVHasher()
@@ -77,7 +77,7 @@ internal struct FNVHasher {
   }
 
   @inline(__always)
-  internal static func hash(_ namespace: XML.ResolvedAttributes.Reference?,
+  internal static func hash(_ namespace: XML.ResolvedAttributesView.Reference?,
                             local: borrowing Span<XML.Byte>,
                             in source: borrowing Span<XML.Byte>,
                             storage: Span<XML.Byte>) -> UInt64 {
@@ -95,16 +95,16 @@ internal struct FNVHasher {
 
 internal enum Bytes {
   @inline(__always)
-  internal static func equal(_ lhs: XML.ResolvedAttributes.Reference,
-                             _ rhs: XML.ResolvedAttributes.Reference,
+  internal static func equal(_ lhs: XML.ResolvedAttributesView.Reference,
+                             _ rhs: XML.ResolvedAttributesView.Reference,
                              in source: borrowing Span<XML.Byte>,
                              storage: Span<XML.Byte>) -> Bool {
     span(of: lhs, in: source, storage: storage) == span(of: rhs, in: source, storage: storage)
   }
 
   @inline(__always)
-  internal static func equal(_ lhs: XML.ResolvedAttributes.Reference?,
-                             _ rhs: XML.ResolvedAttributes.Reference?,
+  internal static func equal(_ lhs: XML.ResolvedAttributesView.Reference?,
+                             _ rhs: XML.ResolvedAttributesView.Reference?,
                              in source: borrowing Span<XML.Byte>,
                              storage: Span<XML.Byte>) -> Bool {
     guard let lhs else { return rhs == nil }

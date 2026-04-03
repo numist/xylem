@@ -8,7 +8,9 @@ extension XML {
   /// ``XML/UnresolvedAttributes`` value. Attribute values that required entity
   /// expansion are stored in an internal buffer rather than pointing back into
   /// the source; callers receive the same `Span<XML.Byte>` API regardless.
-  public struct ResolvedAttributes: ~Escapable {
+  ///
+  /// This is a borrowing view - it does not own the underlying storage.
+  public struct ResolvedAttributesView: ~Escapable {
     package enum Reference {
       case input(SourceRange)
       case buffer(Range<Int>)
@@ -30,16 +32,16 @@ extension XML {
 
     private let source: Span<Byte>
     package let range: SourceRange
-    private let buffer: [Byte]
-    private let records: [Record]
+    private let buffer: Span<Byte>
+    private let records: Span<Record>
 
-    @_lifetime(borrow source)
+    @_lifetime(borrow source, borrow buffer, borrow records)
     package init(source: borrowing Span<Byte>, range: SourceRange,
-                 buffer: consuming [Byte], records: consuming [Record]) {
+                 buffer: borrowing [Byte], records: borrowing [Record]) {
       self.source = copy source
       self.range = range
-      self.buffer = consume buffer
-      self.records = consume records
+      self.buffer = buffer.span
+      self.records = records.span
     }
 
     /// The number of attributes in the list.
@@ -90,7 +92,7 @@ extension XML {
       case let .input(range):
         return source.extracting(range.absolute(in: self.range))
       case let .buffer(range):
-        return buffer.span.extracting(range)
+        return buffer.extracting(range)
       }
     }
   }

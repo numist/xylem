@@ -28,7 +28,7 @@ extension Handler {
 
   public mutating func start(element name: XML.QualifiedNameView,
                              namespace uri: Span<XML.Byte>?,
-                             attributes: XML.ResolvedAttributes) throws(Failure) {}
+                             attributes: XML.ResolvedAttributesView) throws(Failure) {}
 
   public mutating func end(element name: XML.QualifiedNameView,
                            namespace uri: Span<XML.Byte>?) throws(Failure) {}
