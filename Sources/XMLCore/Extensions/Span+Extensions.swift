@@ -133,21 +133,6 @@ extension Span where Element == XML.Byte {
     extracting(range.bounds)
   }
 
-  // Returns true without constructing an intermediate Span — avoids one
-  // bounds-check and Span initialisation on every end-tag close, where both
-  // operands live in the same flat byte buffer.
-  @inline(__always)
-  package func equals(_ range: SourceRange, in source: borrowing Span<Element>) -> Bool {
-    guard count == range.count else { return false }
-    guard count > 0 else { return true }
-    return withUnsafeBufferPointer { lhs in
-      source.withUnsafeBufferPointer { rhs in
-        UnsafeRawBufferPointer(start: rhs.baseAddress! + range.lowerBound, count: count)
-          .elementsEqual(UnsafeRawBufferPointer(lhs))
-      }
-    }
-  }
-
   // MARK: - Decoding
 
   // Decode the UTF-8 scalar starting at `offset`. Returns nil at end of input.

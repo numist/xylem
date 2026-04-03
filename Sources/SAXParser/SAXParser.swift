@@ -241,7 +241,7 @@ private struct Parser: ~Copyable, ~Escapable {
         }
 
       case let .end(name):
-        guard let last = elements.last, name.equals(last, in: bytes) else {
+        guard let last = elements.last, name == bytes.extracting(last) else {
           throw .invalidDocument
         }
         elements.removeLast()
