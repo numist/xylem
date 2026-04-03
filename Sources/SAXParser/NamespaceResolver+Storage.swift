@@ -27,7 +27,6 @@ internal struct Arena {
   }
 
   @inline(__always)
-  @_lifetime(borrow bytes)
   internal mutating func intern(_ bytes: borrowing Span<XML.Byte>) -> XML.ResolvedAttributes.Reference {
     let start = self.bytes.count
     bytes.withUnsafeBufferPointer { self.bytes.append(contentsOf: $0) }
@@ -41,7 +40,6 @@ internal struct Arena {
   }
 
   @inline(__always)
-  @_lifetime(borrow value)
   internal mutating func append(expanding value: borrowing Span<XML.Byte>, mode: Expansion = .attribute)
       throws(XML.Error) -> XML.ResolvedAttributes.Reference? {
     guard let range = try bytes.append(expanding: value, mode: mode) else { return nil }

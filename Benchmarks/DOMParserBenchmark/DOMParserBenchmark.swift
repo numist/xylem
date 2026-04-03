@@ -33,7 +33,6 @@ private func document(body: String, note: String? = nil, interval: Int = 1, size
 // MARK: - DOM parse + walk
 
 @inline(never)
-@_lifetime(borrow bytes)
 private func parse(_ bytes: Span<XML.Byte>) throws -> Int {
   let document = try DOMParser.parse(bytes: bytes)
   var total = 0
