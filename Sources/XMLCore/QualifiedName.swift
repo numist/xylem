@@ -49,7 +49,7 @@ extension XML {
     @_lifetime(borrow bytes)
     package init(unvalidated bytes: borrowing Span<Byte>, colon: Span<Byte>.Index? = nil) {
       self.bytes = copy bytes
-      self.colon = colon ?? bytes.first(UInt8(ascii: ":"))
+      self.colon = colon
     }
 
     @_lifetime(borrow bytes)
